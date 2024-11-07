@@ -1,0 +1,14 @@
+---
+title: "PSY6422 Project"
+output: html_document
+date: "2024-11-07"
+---
+
+This will be the index page
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
