@@ -106,10 +106,6 @@ master_df <- master_df[,c(1,3,8,4,7,2,6,5)]
 #Save master data frame as a csv file
 write.csv(master_df, "data/masterfile.csv")
 
-#Clean environment & memory
-rm(csvfiles, event_types, i, operators, react_codes, rename_cols, tocs, train_frame, train_reader)
-gc()
-
 ##Spiral graph -------------------------------------------------------------------------------------------------------------------------------------
 
 #Count the number of cancellations by date
