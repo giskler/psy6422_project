@@ -1,5 +1,5 @@
-#Train Cancellations in Great Britain 
-##PSY 6422 Data Analysis & Visualisation
+# Train Cancellations in Great Britain 
+## PSY 6422 Data Analysis & Visualisation
 
 This project took shape within the first few weeks of the semester as the early morning trains I needed to take to Sheffield were cancelled more often than not. My initial idea was to visualise train cancellations on a map of the UK, but limitations of the data set soon put an end to that. The scope had to be narrowed from the UK to just Great Britain as data for Northern Ireland was not included and showing the amount of cancellations on a map would not be very useful without the ability to normalise the data.
 
