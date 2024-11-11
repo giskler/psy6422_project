@@ -1,0 +1,11 @@
+Variables:
+
+departure_date - Continuous variable containing departure dates for trains in the format YYYY-MM-DD. The original data set contained files using two different date formats (DMY, DMY-H:M) which were converted to YYYY-MM-DD.
+
+event_type - Categorical variable with three levels (C, D, P). Five levels (A, F, M, O, S) were dropped due to four being the identifiers for data on delayed trains and one (S) being the identifier for planned cancellations (i.e., automatic cancellations of trains that were never scheduled to run due to bank holidays etc.).
+
+react_reason - Categorical variable with 276 levels. These are more detailed reasons for why trains were cancelled.
+
+toc_code - Categorical variable with 30 levels. This variable contains the identifiers for passenger train operators. Seventy-nine levels were dropped due to them being identifiers for freight and charter operators or identifiers that are not in use.
+
+stanox - Continous variable containing numerical identifiers for points of origin. These include railway stations, depots, sidings, etc.
