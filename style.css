@@ -55,10 +55,10 @@
 /* Fix font on mobile */
 @media only screen and (max-width: 700px){
   .top-text {
-    font-size: 2em;
+    font-size: 1.5em;
   } 
   .bottom-text {
-    font-size: 3em;
+    font-size: 2em;
   }
 }
 
