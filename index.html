@@ -10,6 +10,7 @@
 
 
 
+<meta name="date" content="2024-11-24" />
 
 <title>PSY 6422 Project</title>
 
@@ -377,7 +378,7 @@ div.tocify {
 <h1 class="title toc-ignore">PSY 6422 Project</h1>
 <h4 class="author"><div class="line-block">Kim Idar Giske<br />
 Registration number: 240196505</div></h4>
-<h4 class="date">November 11th, 2024</h4>
+<h4 class="date">2024-11-24</h4>
 
 </div>
 
@@ -445,57 +446,37 @@ ended up being used in the final visualisation, but have been retained
 to allow for different types of analyses or graphs in any future
 adaptations of this project. Refer to the code book for more details on
 these variables.</p>
-<table class="striped">
+<table style="width:86%;">
+<colgroup>
+<col width="23%" />
+<col width="62%" />
+</colgroup>
 <thead>
-<tr>
-<th style="text-align:left;">
-Variable
-</th>
-<th style="text-align:left;">
-Description
-</th>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td style="text-align:left;">
-departure_date
-</td>
-<td style="text-align:left;">
-The date of the cancellation
-</td>
+<tr class="odd">
+<td align="left">departure_date</td>
+<td align="left">The date of the cancellation</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-event_type
-</td>
-<td style="text-align:left;">
-The type of cancellation
-</td>
+<tr class="even">
+<td align="left">event_type</td>
+<td align="left">The type of cancellation</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-react_reason
-</td>
-<td style="text-align:left;">
-The reason for the cancellation
-</td>
+<tr class="odd">
+<td align="left">react_reason</td>
+<td align="left">The reason for the cancellation</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-toc_code
-</td>
-<td style="text-align:left;">
-The train operator
-</td>
+<tr class="even">
+<td align="left">toc_code</td>
+<td align="left">The train operator</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-stanox
-</td>
-<td style="text-align:left;">
-The numerical code for the point of origin
-</td>
+<tr class="odd">
+<td align="left">stanox</td>
+<td align="left">The numerical code for the point of origin</td>
 </tr>
 </tbody>
 </table>
@@ -558,14 +539,24 @@ between April 1st 2015 and October 12th 2024 were used.</p>
 </div>
 <div id="sanity-check" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Sanity Check</h2>
-<p>Sanity check to see if the data was read correctly. The range of
-dates should be from April 1st 2015 until October 12th 2024 and be a
-total of 3482 days.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Sanity check</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;master_df begins at&quot;</span>, <span class="fu">min</span>(master_df<span class="sc">$</span>departure_date), <span class="st">&quot;and ends at&quot;</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="fu">max</span>(master_df<span class="sc">$</span>departure_date), <span class="st">&quot;and consists of&quot;</span>, <span class="fu">length</span>(<span class="fu">unique</span>(master_df<span class="sc">$</span>departure_date)),</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="st">&quot;days of observations&quot;</span>))</span></code></pre></div>
-<pre><code>## [1] &quot;master_df begins at 2015-04-01 and ends at 2024-10-12 and consists of 3482 days of observations&quot;</code></pre>
+<p>Sanity check to see if the data was read correctly.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Create an assert function for sanity checks</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>assert <span class="ot">&lt;-</span> <span class="cf">function</span>(value, target) {</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="co"># This function crashes the code if value does not equal target</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="cf">if</span> (value <span class="sc">==</span> target) {</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>        <span class="fu">print</span>(<span class="st">&quot;Value equals target&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="st">&quot;Value does not equal target&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    }</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>}</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># Count number of days between first and last observation</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>date_diff <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(<span class="fu">max</span>(master_df<span class="sc">$</span>departure_date), <span class="fu">min</span>(master_df<span class="sc">$</span>departure_date),</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">units =</span> <span class="st">&quot;days&quot;</span>))</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co"># Sanity check</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">assert</span>(<span class="fu">length</span>(<span class="fu">unique</span>(master_df<span class="sc">$</span>departure_date)), date_diff)</span></code></pre></div>
+<pre><code>## [1] &quot;Value equals target&quot;</code></pre>
 </div>
 <div id="descriptors" class="section level2" number="3.4">
 <h2><span class="header-section-number">3.4</span> Descriptors</h2>
@@ -620,8 +611,8 @@ needing to obtain access to the Rail Data Marketplace.</p>
 <span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co"># Rearrange columns for better readability</span></span>
 <span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>master_df <span class="ot">&lt;-</span> master_df[, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">8</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">5</span>)]</span>
 <span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a></span>
-<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co"># Save master data frame as a csv file</span></span>
-<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="fu">write.csv</span>(master_df, <span class="st">&quot;data/masterfile.csv&quot;</span>)</span></code></pre></div>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co"># Save master data frame as a csv file and compress it</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="fu">write.csv</span>(master_df, <span class="at">file =</span> <span class="fu">gzfile</span>(<span class="st">&quot;data/masterfile.csv.gz&quot;</span>))</span></code></pre></div>
 </div>
 </div>
 <div id="visualisation" class="section level1" number="4">
@@ -648,8 +639,8 @@ frame.</p>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># Sanity check, number of cancellations should equal number of observations in</span></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># master data frame</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sum</span>(train_count<span class="sc">$</span>n) <span class="sc">==</span> <span class="fu">nrow</span>(master_df))</span></code></pre></div>
-<pre><code>## [1] TRUE</code></pre>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">assert</span>(<span class="fu">nrow</span>(master_df), <span class="fu">sum</span>(train_count<span class="sc">$</span>n))</span></code></pre></div>
+<pre><code>## [1] &quot;Value equals target&quot;</code></pre>
 </div>
 <div id="creating-a-spiral-plot-function" class="section level2"
 number="4.2">
@@ -763,10 +754,9 @@ plots covering roughly three years each.</p>
 and there are uneven distributions. The first year label is also
 obscuring the unit labels on two of the plots.</p>
 </div>
-<div id="improving-the-plot-2-electric-boogaloo" class="section level2"
-number="4.5">
-<h2><span class="header-section-number">4.5</span> Improving the Plot 2:
-Electric Boogaloo</h2>
+<div id="improving-the-plot-again" class="section level2" number="4.5">
+<h2><span class="header-section-number">4.5</span> Improving the Plot
+Again</h2>
 <p>The next idea was to draw each year separately and then put all the
 plots into a grid. To do this, the plotting function has to be revisited
 and modified slightly. The most important modification is adding a
@@ -881,16 +871,17 @@ source attribution added.</p>
 <span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="fu">plot_grid</span>(title, plot_row, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>))</span>
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># Add source attribution</span></span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="fu">grid.text</span>(<span class="st">&quot;Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.&quot;</span>,</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">unit</span>(<span class="fl">0.6</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">10</span>, <span class="st">&quot;mm&quot;</span>), <span class="at">y =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">-</span> <span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">&quot;mm&quot;</span>),</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>))</span></code></pre></div>
-<p><!-- Trigger the Modal -->
-<img src="figs/all_years.svg" alt="Grid plot" id="myImg"/></p>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="fu">grid.text</span>(<span class="st">&quot;Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.</span><span class="sc">\n</span><span class="st">CC-BY-SA Kim Idar Giske&quot;</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">5</span>, <span class="st">&quot;mm&quot;</span>), <span class="at">y =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">-</span> <span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">&quot;mm&quot;</span>),</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">just =</span> <span class="st">&quot;left&quot;</span>, <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>))</span></code></pre></div>
+<!-- Trigger the Modal -->
+<p><img src="figs/all_years.svg" alt="Grid plot" id="myImg"/></p>
 <!-- The Modal -->
 <div id="myModal" class="modal">
-<p><!-- The Close Button --> <span class="closeimg">×</span></p>
-<p><!-- Modal Content (The Image) -->
-<img class="modal-content" id="img01"></p>
+<!-- The Close Button -->
+<p><span class="closeimg">×</span></p>
+<!-- Modal Content (The Image) -->
+<p><img id="img01" class="modal-content"/></p>
 <!-- Modal Caption (Image Text) -->
 <div id="caption">
 
@@ -931,9 +922,9 @@ scaling without loss of information.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Save the grid plot</span></span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">svg</span>(<span class="st">&quot;figs/all_years.svg&quot;</span>, <span class="at">width =</span> <span class="dv">20</span>, <span class="at">height =</span> <span class="dv">15</span>)</span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="fu">plot_grid</span>(title, plot_row, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>))</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="fu">grid.text</span>(<span class="st">&quot;Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.&quot;</span>,</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">unit</span>(<span class="fl">0.6</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">10</span>, <span class="st">&quot;mm&quot;</span>), <span class="at">y =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">-</span> <span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">&quot;mm&quot;</span>),</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="fu">grid.text</span>(<span class="st">&quot;Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.</span><span class="sc">\n</span><span class="st">CC-BY-SA Kim Idar Giske&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">5</span>, <span class="st">&quot;mm&quot;</span>), <span class="at">y =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;npc&quot;</span>) <span class="sc">-</span> <span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">&quot;mm&quot;</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="at">just =</span> <span class="st">&quot;left&quot;</span>, <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>))</span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">dev.off</span>())</span></code></pre></div>
 </div>
 </div>
@@ -947,119 +938,64 @@ years. This could be due to any number of reasons, but by looking into
 some of the highest spikes throughout the years, it seems that extreme
 weather events are at least partially responsible. Below is a list of
 some of the most severe spikes and corresponding weather events:</p>
-<table class="striped">
+<table style="width:99%;">
+<colgroup>
+<col width="37%" />
+<col width="18%" />
+<col width="43%" />
+</colgroup>
 <thead>
-<tr>
-<th style="text-align:left;">
-Date
-</th>
-<th style="text-align:left;">
-Cancellations
-</th>
-<th style="text-align:left;">
-Weather Event
-</th>
+<tr class="header">
+<th align="left">Date</th>
+<th align="left">Cancellations</th>
+<th align="left">Weather Event</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td style="text-align:left;">
-June 23rd, 2016
-</td>
-<td style="text-align:left;">
-4749
-</td>
-<td style="text-align:left;">
-Severe flooding
-</td>
+<tr class="odd">
+<td align="left">June 23rd, 2016</td>
+<td align="left">4749</td>
+<td align="left">Severe flooding</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-February 23rd, 2017
-</td>
-<td style="text-align:left;">
-5007
-</td>
-<td style="text-align:left;">
-Storm Doris
-</td>
+<tr class="even">
+<td align="left">February 23rd, 2017</td>
+<td align="left">5007</td>
+<td align="left">Storm Doris</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-February 26th-March 3rd, 2018
-</td>
-<td style="text-align:left;">
-22,627
-</td>
-<td style="text-align:left;">
-Extreme cold spell
-</td>
+<tr class="odd">
+<td align="left">February 26th-March 3rd, 2018</td>
+<td align="left">22,627</td>
+<td align="left">Extreme cold spell</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-September 19th-21st, 2018
-</td>
-<td style="text-align:left;">
-5720
-</td>
-<td style="text-align:left;">
-Storms Ali and Bronagh
-</td>
+<tr class="even">
+<td align="left">September 19th-21st, 2018</td>
+<td align="left">5720</td>
+<td align="left">Storms Ali and Bronagh</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-November 26th-27th, 2021
-</td>
-<td style="text-align:left;">
-6082
-</td>
-<td style="text-align:left;">
-Storm Arwen
-</td>
+<tr class="odd">
+<td align="left">November 26th-27th, 2021</td>
+<td align="left">6082</td>
+<td align="left">Storm Arwen</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-February 16th-21st, 2022
-</td>
-<td style="text-align:left;">
-25,116
-</td>
-<td style="text-align:left;">
-Storms Dudley, Eunice and Franklin
-</td>
+<tr class="even">
+<td align="left">February 16th-21st, 2022</td>
+<td align="left">25,116</td>
+<td align="left">Storms Dudley, Eunice and Franklin</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-February 16th-21st, 2022
-</td>
-<td style="text-align:left;">
-15,005
-</td>
-<td style="text-align:left;">
-Extreme heatwave
-</td>
+<tr class="odd">
+<td align="left">February 16th-21st, 2022</td>
+<td align="left">15,005</td>
+<td align="left">Extreme heatwave</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-December 8th-18th, 2022
-</td>
-<td style="text-align:left;">
-21,236
-</td>
-<td style="text-align:left;">
-Extreme cold spell
-</td>
+<tr class="even">
+<td align="left">December 8th-18th, 2022</td>
+<td align="left">21,236</td>
+<td align="left">Extreme cold spell</td>
 </tr>
-<tr>
-<td style="text-align:left;">
-January 2nd, 2024
-</td>
-<td style="text-align:left;">
-5482
-</td>
-<td style="text-align:left;">
-Storm Henk
-</td>
+<tr class="odd">
+<td align="left">January 2nd, 2024</td>
+<td align="left">5482</td>
+<td align="left">Storm Henk</td>
 </tr>
 </tbody>
 </table>
@@ -1106,6 +1042,55 @@ be tracked via train cancellations?</p>
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0" line-spacing="2">
+<div id="ref-R-data.table" class="csl-entry">
+Barrett, T., Dowle, M., Srinivasan, A., Gorecki, J., Chirico, M.,
+Hocking, T., &amp; Schwendinger, B. (2024). <em>Data.table: Extension of
+‘data.frame‘</em>. <a
+href="https://r-datatable.com">https://r-datatable.com</a>
+</div>
+<div id="ref-R-janitor" class="csl-entry">
+Firke, S. (2023). <em>Janitor: Simple tools for examining and cleaning
+dirty data</em>. <a
+href="https://github.com/sfirke/janitor">https://github.com/sfirke/janitor</a>
+</div>
+<div id="ref-lubridate2011" class="csl-entry">
+Grolemund, G., &amp; Wickham, H. (2011). Dates and times made easy with
+<span class="nocase">lubridate</span>. <em>Journal of Statistical
+Software</em>, <em>40</em>(3), 1–25. <a
+href="https://www.jstatsoft.org/v40/i03/">https://www.jstatsoft.org/v40/i03/</a>
+</div>
+<div id="ref-ComplexHeatmap2022" class="csl-entry">
+Gu, Z. (2022). Complex heatmap visualization. <em>iMeta</em>. <a
+href="https://doi.org/10.1002/imt2.43">https://doi.org/10.1002/imt2.43</a>
+</div>
+<div id="ref-R-circlize" class="csl-entry">
+Gu, Z. (2024a). <em>Circlize: Circular visualization</em>. <a
+href="https://github.com/jokergoo/circlize">https://github.com/jokergoo/circlize</a>
+</div>
+<div id="ref-R-ComplexHeatmap" class="csl-entry">
+Gu, Z. (2024b). <em>ComplexHeatmap: Make complex heatmaps</em>. <a
+href="https://github.com/jokergoo/ComplexHeatmap">https://github.com/jokergoo/ComplexHeatmap</a>
+</div>
+<div id="ref-R-spiralize" class="csl-entry">
+Gu, Z. (2024c). <em>Spiralize: Visualize data on spirals</em>. <a
+href="https://github.com/jokergoo/spiralize">https://github.com/jokergoo/spiralize</a>
+</div>
+<div id="ref-ComplexHeatmap2016" class="csl-entry">
+Gu, Z., Eils, R., &amp; Schlesner, M. (2016). Complex heatmaps reveal
+patterns and correlations in multidimensional genomic data.
+<em>Bioinformatics</em>. <a
+href="https://doi.org/10.1093/bioinformatics/btw313">https://doi.org/10.1093/bioinformatics/btw313</a>
+</div>
+<div id="ref-circlize2014" class="csl-entry">
+Gu, Z., Gu, L., Eils, R., Schlesner, M., &amp; Brors, B. (2014).
+Circlize implements and enhances circular visualization in r.
+<em>Bioinformatics</em>, <em>30</em>, 2811–2812.
+</div>
+<div id="ref-spiralize2021" class="csl-entry">
+Gu, Z., &amp; Huebschmann, D. (2021). Spiralize: An r package for
+visualizing data on spirals. <em>Bioinformatics</em>. <a
+href="https://doi.org/10.1093/bioinformatics/btab778">https://doi.org/10.1093/bioinformatics/btab778</a>
+</div>
 <div id="ref-MetWeather" class="csl-entry">
 Met Office. (2024a). <em>Past weather events</em>. Met Office. <a
 href="https://www.metoffice.gov.uk/weather/learn-about/past-uk-weather-events">https://www.metoffice.gov.uk/weather/learn-about/past-uk-weather-events</a>
@@ -1114,10 +1099,77 @@ href="https://www.metoffice.gov.uk/weather/learn-about/past-uk-weather-events">h
 Met Office. (2024b). <em>UK storm centre</em>. Met Office. <a
 href="https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-storm-centre/index">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-storm-centre/index</a>
 </div>
+<div id="ref-R-rsvg" class="csl-entry">
+Ooms, J. (2024). <em>Rsvg: Render SVG images into PDF, PNG,
+(encapsulated) PostScript, or bitmap arrays</em>. <a
+href="https://docs.ropensci.org/rsvg/">https://docs.ropensci.org/rsvg/</a>
+</div>
+<div id="ref-R-base" class="csl-entry">
+R Core Team. (2024). <em>R: A language and environment for statistical
+computing</em>. R Foundation for Statistical Computing. <a
+href="https://www.R-project.org/">https://www.R-project.org/</a>
+</div>
 <div id="ref-NWRDelay" class="csl-entry">
 Rail Delivery Group. (2024). <em>NWR historic delay attribution</em>.
 RSP Limited. <a
 href="https://raildata.org.uk/dashboard/dataProduct/P-3fade1ab-0a85-4ac6-bc51-17c770350af3/dataFiles">https://raildata.org.uk/dashboard/dataProduct/P-3fade1ab-0a85-4ac6-bc51-17c770350af3/dataFiles</a>
+</div>
+<div id="ref-R-lubridate" class="csl-entry">
+Spinu, V., Grolemund, G., &amp; Wickham, H. (2023). <em>Lubridate: Make
+dealing with dates a little easier</em>. <a
+href="https://lubridate.tidyverse.org">https://lubridate.tidyverse.org</a>
+</div>
+<div id="ref-R-renv" class="csl-entry">
+Ushey, K., &amp; Wickham, H. (2024). <em>Renv: Project
+environments</em>. <a
+href="https://rstudio.github.io/renv/">https://rstudio.github.io/renv/</a>
+</div>
+<div id="ref-plyr2011" class="csl-entry">
+Wickham, H. (2011). The split-apply-combine strategy for data analysis.
+<em>Journal of Statistical Software</em>, <em>40</em>(1), 1–29. <a
+href="https://www.jstatsoft.org/v40/i01/">https://www.jstatsoft.org/v40/i01/</a>
+</div>
+<div id="ref-R-plyr" class="csl-entry">
+Wickham, H. (2023a). <em>Plyr: Tools for splitting, applying and
+combining data</em>. <a
+href="http://had.co.nz/plyr">http://had.co.nz/plyr</a>
+</div>
+<div id="ref-R-tidyverse" class="csl-entry">
+Wickham, H. (2023b). <em>Tidyverse: Easily install and load the
+tidyverse</em>. <a
+href="https://tidyverse.tidyverse.org">https://tidyverse.tidyverse.org</a>
+</div>
+<div id="ref-tidyverse2019" class="csl-entry">
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D.,
+François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M.,
+Pedersen, T. L., Miller, E., Bache, S. M., Müller, K., Ooms, J.,
+Robinson, D., Seidel, D. P., Spinu, V., … Yutani, H. (2019). Welcome to
+the <span class="nocase">tidyverse</span>. <em>Journal of Open Source
+Software</em>, <em>4</em>(43), 1686. <a
+href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>
+</div>
+<div id="ref-R-readxl" class="csl-entry">
+Wickham, H., &amp; Bryan, J. (2023). <em>Readxl: Read excel files</em>.
+<a href="https://readxl.tidyverse.org">https://readxl.tidyverse.org</a>
+</div>
+<div id="ref-R-dplyr" class="csl-entry">
+Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D.
+(2023). <em>Dplyr: A grammar of data manipulation</em>. <a
+href="https://dplyr.tidyverse.org">https://dplyr.tidyverse.org</a>
+</div>
+<div id="ref-R-purrr" class="csl-entry">
+Wickham, H., &amp; Henry, L. (2023). <em>Purrr: Functional programming
+tools</em>. <a
+href="https://purrr.tidyverse.org/">https://purrr.tidyverse.org/</a>
+</div>
+<div id="ref-R-cowplot" class="csl-entry">
+Wilke, C. O. (2024). <em>Cowplot: Streamlined plot theme and plot
+annotations for ggplot2</em>. <a
+href="https://wilkelab.org/cowplot/">https://wilkelab.org/cowplot/</a>
+</div>
+<div id="ref-R-formatR" class="csl-entry">
+Xie, Y. (2023). <em>formatR: Format r code automatically</em>. <a
+href="https://github.com/yihui/formatR">https://github.com/yihui/formatR</a>
 </div>
 </div>
 </div>

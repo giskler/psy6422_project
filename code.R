@@ -62,9 +62,21 @@ for(i in 1:length(csvfiles)) {
 #Merge the data frames
 master_df <- train_frame %>% reduce(full_join) #Reduce the large list to a single data frame using purrr
 
-#Sanity check, dates should cover from 2015-04-01 till 2024-10-12 and be a total of 3482 days
-paste("master_df begins at", min(master_df$departure_date), "and ends at", max(master_df$departure_date), 
-      "and consists of", length(unique(master_df$departure_date)), "days of observations")
+#Create an assert function for sanity checks
+assert <- function(value, target) {
+  #This function crashes the code if value does not equal target
+  if (value == target) {
+    print("Value equals target")
+  } else {
+    stop("Value does not equal target")
+  }
+}
+
+#Count number of days between first and last observation
+date_diff <- as.numeric(difftime(max(master_df$departure_date), min(master_df$departure_date), units = "days"))
+
+#Sanity check
+assert(length(unique(master_df$departure_date)), date_diff)
 
 #Create a train operator data frame
 operators <- data.frame(toc_code = c("EA","EB", "EC", "ED", "EE", "EF", "EH", "EJ", "EK", "EM", "ES", "ET", "EX", "HA", "HB", "HE", "HF", "HL", 
@@ -103,8 +115,8 @@ master_df <- master_df %>% left_join(event_types,
 #Rearrange columns for readability
 master_df <- master_df[,c(1,3,8,4,7,2,6,5)]
 
-#Save master data frame as a csv file
-write.csv(master_df, "data/masterfile.csv")
+#Save master data frame as a csv file and compress it
+write.csv(master_df, file=gzfile("data/masterfile.csv.gz"))
 
 ##Spiral graph -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -122,7 +134,7 @@ train_count <- train_count %>% left_join(weather,
                                          by=c("departure_date"))
 
 #Sanity check, number of cancellations should equal number of observations in master data frame
-sum(train_count$n) == nrow(master_df)
+assert(nrow(master_df), sum(train_count$n))
 
 #Create a spiral graph function that requires the input of a data frame and a starting and ending date in the format "YYYY-MM-DD"
 #Refer to the documentation for the spiralize library for further details on its functions
@@ -135,11 +147,7 @@ spiral_plot <- function(df, start, end){
   #Initialize the spiral graph. As the spiral is 360 degrees, we have a choice to either normalize each year to 360 or to plot
   #each year as 365/366 days. Both options have their drawbacks and advantages
   spiral_initialize_by_time(xlim = range(temp_df$departure_date), verbose = FALSE, normalize_year = FALSE)
-  
-  #Load & draw weather track
-  #spiral_track(height = 0.1, background = FALSE) #This initializes a new track and sets its height (between 0 and 1)
-  #spiral_bars(temp_df$departure_date, 1, gp = gpar(fill = as.numeric(temp_df$type), col = NA)) #This draws a bar plot on the track
-  
+ 
   #Load train track. We set the range of the y axis to be slightly higher than the maximum value
   spiral_track(height =  0.8, background = FALSE, ylim = c(0, 1.05*max(temp_df$n)))
   
@@ -174,13 +182,7 @@ spiral_plot <- function(df, start, end){
   for (i in 1:length(years)){
     spiral_text(sprintf("%s-01-01", years[i]), TRACK_META$ycenter, years[i], gp = gpar(fontsize = 8)) #Place a year label on January 1st of each year
   } 
-  
-  #Create the legend
-  #lgd = packLegend(
-  #  Legend(title = "Extreme Weather Events", at = unique(na.omit(temp_df$type)),
-  #         legend_gp = gpar(fill = unique(na.omit(temp_df$type)))), max_height = unit(7, "inch")) #Populate the legend with weather events
-  #draw(lgd, x = unit(1, "npc") + unit(13, "mm"), just = "left") 
-  
+
   #Create the title
   grid.text(sprintf("Train cancellations in Great Britain, %s-%s", first(years),last(years)), x = unit(0, "npc") + unit(0, "mm"), y = unit(1, "npc") - unit(0, "mm"),
             gp = gpar(fontsize = 14)) 
@@ -220,11 +222,7 @@ grid_plot <- function(df, start, end){
   #Initialize the spiral graph. As the spiral is 360 degrees, we have a choice to either normalize each year to 360 or to plot
   #each year as 365/366 days. Both options have their drawbacks and advantages
   spiral_initialize_by_time(xlim = range(temp_df$departure_date), verbose = FALSE, normalize_year = FALSE)
-  
-  #Load & draw weather track
-  #spiral_track(height = 0.1, background = FALSE) #This initializes a new track and sets its height (between 0 and 1)
-  #spiral_bars(temp_df$departure_date, 1, gp = gpar(fill = as.numeric(temp_df$type), col = NA)) #This draws a bar plot on the track
-  
+ 
   #Load train track. We set the range of the y axis to be slightly higher than the maximum value
   spiral_track(height =  0.8, background = FALSE, ylim = c(0, 1.05*max(y_maximum)))
   
@@ -255,16 +253,6 @@ grid_plot <- function(df, start, end){
   
   #Add year labels
   years = as.character(unique(year(temp_df$departure_date))) #Create a vector with the years in the date range
-  
-  #for (i in 1:length(years)){
-  #  spiral_text(sprintf("%s-04-01", years[i]), TRACK_META$ycenter, years[i], gp = gpar(fontsize = 8)) #Place a year label on April 1st of each year
-  #} 
-  
-  #Create the legend
-  #lgd = packLegend(
-  #  Legend(title = "Extreme Weather Events", at = unique(na.omit(temp_df$type)),
-  #         legend_gp = gpar(fill = unique(na.omit(temp_df$type)))), max_height = unit(7, "inch")) #Populate the legend with weather events
-  #draw(lgd, x = unit(1, "npc") + unit(13, "mm"), just = "left") 
   
   #Create the title
   grid.text(sprintf("%s", years), 
@@ -305,14 +293,14 @@ plot_row <- plot_grid(plotlist = pl, ncol = 4)
 
 #Combine title with grid of years
 plot_grid(title, plot_row, ncol = 1, rel_heights = c(0.1, 1))
-grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.", 
-          x = unit(0.6, "npc") + unit(10, "mm"), y = unit(0.25, "npc") - unit(0, "mm"),
+grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.\nCC-BY-SA Kim Idar Giske", 
+          x = unit(0.5, "npc") + unit(5, "mm"), y = unit(0.05, "npc") - unit(0, "mm"), just = "left",
           gp = gpar(fontsize = 8)) 
 
 #Save the grid plot
 svg("figs/all_years.svg", width = 20, height = 15)
 plot_grid(title, plot_row, ncol = 1, rel_heights = c(0.1, 1))
-grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.", 
-          x = unit(0.6, "npc") + unit(10, "mm"), y = unit(0.25, "npc") - unit(0, "mm"),
+grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.\nCC-BY-SA Kim Idar Giske", 
+          x = unit(0.5, "npc") + unit(5, "mm"), y = unit(0.05, "npc") - unit(0, "mm"), just = "left",
           gp = gpar(fontsize = 8)) 
 invisible(dev.off())

@@ -3,7 +3,7 @@ title: "PSY 6422 Project"
 author: |
   | Kim Idar Giske
   | Registration number: 240196505
-date: "November 11th, 2024"
+date: "`r Sys.Date()`"
 output: 
   html_document:
     css: style.css
@@ -18,15 +18,21 @@ output:
     includes:
       in_header:
       - header.html
+  pdf_document: 
+    toc: true
+    number_sections: true
+    highlight: haddock
 link-citations: true
 bibliography:
   - references.bib
   - packages.bib
 csl: apa.csl
+nocite: '@*'
 ---
 
 ```{r setup, include=FALSE}
 library(formatR)
+library(rsvg)
 knitr::opts_chunk$set(echo = TRUE, tidy=TRUE, tidy.opts=list(width.cutoff = 80))
 ```
 
@@ -79,38 +85,21 @@ The data used in this project was obtained from the [NWR Historic Delay Attribut
 
 ## Variables
 
-These are the variables included in this project. Not all of them ended up being used in the final visualisation, but have been retained  to allow for different types of analyses or graphs in any future adaptations of this project. Refer to the code book for more details on these variables.
+These are the variables included in this project. Not all of them ended up being used in the final visualisation, but have been retained to allow for different types of analyses or graphs in any future adaptations of this project. Refer to the code book for more details on these variables.
 
-<table class="striped">
- <thead>
-  <tr>
-   <th style="text-align:left;">Variable</th>
-   <th style="text-align:left;">Description</th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;">departure_date</td>
-   <td style="text-align:left;">The date of the cancellation</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">event_type</td>
-   <td style="text-align:left;">The type of cancellation</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">react_reason</td>
-   <td style="text-align:left;">The reason for the cancellation</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">toc_code</td>
-   <td style="text-align:left;">The train operator</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">stanox</td>
-   <td style="text-align:left;">The numerical code for the point of origin</td>
-  </tr>
-</tbody>
-</table>
++----------------+--------------------------------------------+
+| Variable       | Description                                |
++:===============+:===========================================+
+| departure_date | The date of the cancellation               |
++----------------+--------------------------------------------+
+| event_type     | The type of cancellation                   |
++----------------+--------------------------------------------+
+| react_reason   | The reason for the cancellation            |
++----------------+--------------------------------------------+
+| toc_code       | The train operator                         |
++----------------+--------------------------------------------+
+| stanox         | The numerical code for the point of origin |
++----------------+--------------------------------------------+
 
 ## Reading the Data
 
@@ -167,12 +156,24 @@ master_df <- train_frame %>% reduce(full_join)
 
 ## Sanity Check
 
-Sanity check to see if the data was read correctly. The range of dates should be from April 1st 2015 until October 12th 2024 and be a total of 3482 days.
+Sanity check to see if the data was read correctly.
 
 ```{r sanity check}
+#Create an assert function for sanity checks
+assert <- function(value, target) {
+  #This function crashes the code if value does not equal target
+  if (value == target) {
+    print("Value equals target")
+  } else {
+    stop("Value does not equal target")
+  }
+}
+
+#Count number of days between first and last observation
+date_diff <- as.numeric(difftime(max(master_df$departure_date), min(master_df$departure_date), units = "days"))
+
 #Sanity check
-print(paste("master_df begins at", min(master_df$departure_date), "and ends at", max(master_df$departure_date), 
-      "and consists of", length(unique(master_df$departure_date)), "days of observations"))
+assert(length(unique(master_df$departure_date)), date_diff)
 ```
 
 ## Descriptors
@@ -226,8 +227,8 @@ master_df <- master_df %>% left_join(event_types,
 #Rearrange columns for better readability
 master_df <- master_df[,c(1,3,8,4,7,2,6,5)]
     
-#Save master data frame as a csv file
-write.csv(master_df, "data/masterfile.csv")
+#Save master data frame as a csv file and compress it
+write.csv(master_df, file=gzfile("data/masterfile.csv.gz"))
 ```
 
 # Visualisation
@@ -243,7 +244,7 @@ Before creating the plot some preparation is required. Since the objective is to
 train_count <- master_df %>% group_by(departure_date) %>% tally()
 
 #Sanity check, number of cancellations should equal number of observations in master data frame
-print(sum(train_count$n) == nrow(master_df))
+assert(nrow(master_df), sum(train_count$n))
 ```
 
 ## Creating a Spiral Plot Function
@@ -340,6 +341,14 @@ spiral_plot(train_count, "2015-04-01", "2024-10-12")
 invisible(dev.off())
 ```
 
+```{r pdf fig1, echo=FALSE, out.width="100%"}
+#To make the figure look nice in the PDF
+if(knitr::is_latex_output()){
+  rsvg::rsvg_pdf(svg = "figs/spiral_plot.svg", file = "figs/spiral_plot.pdf")
+  knitr::include_graphics("figs/spiral_plot.pdf")
+}
+```
+
 <img src="figs/spiral_plot.svg"/> <br /><br />
 
 Unfortunately, it looks like there is a bit of an information overload going on here, so readability is not great. The drawback of plotting 365/366 day years on a 360 degree spiral can also be seen as the years are drifting and not aligning correctly with the months.
@@ -370,6 +379,30 @@ spiral_plot(train_count, "2021-01-01", "2024-10-12")
 invisible(dev.off())
 ```
 
+```{r pdf fig2, echo=FALSE, out.width="100%"}
+#To make the figure look nice in the PDF
+if(knitr::is_latex_output()){
+  rsvg::rsvg_pdf(svg = "figs/2015_2017.svg", file = "figs/2015_2017.pdf")
+  knitr::include_graphics("figs/2015_2017.pdf")
+}
+```
+
+```{r pdf fig3, echo=FALSE, out.width="100%"}
+#To make the figure look nice in the PDF
+if(knitr::is_latex_output()){
+  rsvg::rsvg_pdf(svg = "figs/2018_2020.svg", file = "figs/2018_2020.pdf")
+  knitr::include_graphics("figs/2018_2020.pdf")
+}
+```
+
+```{r pdf fig4, echo=FALSE, out.width="100%"}
+#To make the figure look nice in the PDF
+if(knitr::is_latex_output()){
+  rsvg::rsvg_pdf(svg = "figs/2021_2024.svg", file = "figs/2021_2024.pdf")
+  knitr::include_graphics("figs/2021_2024.pdf")
+}
+```
+
 <img src="figs/2015_2017.svg"/>
 
 <img src="figs/2018_2020.svg"/>
@@ -378,7 +411,7 @@ invisible(dev.off())
 
 Better, but still problematic. There is still some drift of the years and there are uneven distributions. The first year label is also obscuring the unit labels on two of the plots.
 
-## Improving the Plot 2: Electric Boogaloo
+## Improving the Plot Again
 
 The next idea was to draw each year separately and then put all the plots into a grid. To do this, the plotting function has to be revisited and modified slightly. The most important modification is adding a vector that will hold the maximum y axis value for the entire data set. Without setting this the plots would end up being on different scales, which would make the grid appear visually deceptive as well as making comparisons needlessly difficult. A label that displays the total amount of cancellations per year has also been added.
 
@@ -495,26 +528,25 @@ plot_row <- plot_grid(plotlist = pl, ncol = 4)
 plot_grid(title, plot_row, ncol = 1, rel_heights = c(0.1, 1))
 
 #Add source attribution
-grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.", 
-          x = unit(0.6, "npc") + unit(10, "mm"), y = unit(0.25, "npc") - unit(0, "mm"),
+grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.\nCC-BY-SA Kim Idar Giske", 
+          x = unit(0.5, "npc") + unit(5, "mm"), y = unit(0.05, "npc") - unit(0, "mm"), just = "left",
           gp = gpar(fontsize = 8)) 
 ```
 
- <!-- Trigger the Modal -->
-<img src="figs/all_years.svg" alt="Grid plot" id="myImg"/>
+<!-- Trigger the Modal --> <img src="figs/all_years.svg" alt="Grid plot" id="myImg"/>
 
 <!-- The Modal -->
-<div id="myModal" class="modal">
 
-  <!-- The Close Button -->
-  <span class="closeimg">&times;</span>
+:::: {#myModal .modal}
+<!-- The Close Button --> [×]{.closeimg}
 
-  <!-- Modal Content (The Image) -->
-  <img class="modal-content" id="img01">
+<!-- Modal Content (The Image) --> <img id="img01" class="modal-content"/>
 
-  <!-- Modal Caption (Image Text) -->
-  <div id="caption"></div>
-</div> 
+<!-- Modal Caption (Image Text) -->
+
+::: {#caption}
+:::
+::::
 
 <script>
 // Get the modal
@@ -543,6 +575,14 @@ span.onclick = function() {
 *Click on the figure to see it in a higher resolution.*
 :::
 
+```{r pdf fig5, echo=FALSE, out.width="100%"}
+#To make the figure look nice in the PDF
+if(knitr::is_latex_output()){
+  rsvg::rsvg_pdf(svg = "figs/all_years.svg", file = "figs/all_years.pdf")
+  knitr::include_graphics("figs/all_years.pdf")
+}
+```
+
 ## Saving the Final Visualisation
 
 The final visualisation is saved as an svg file, which allows for scaling without loss of information.
@@ -551,8 +591,8 @@ The final visualisation is saved as an svg file, which allows for scaling withou
 #Save the grid plot
 svg("figs/all_years.svg", width = 20, height = 15)
 plot_grid(title, plot_row, ncol = 1, rel_heights = c(0.1, 1))
-grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.", 
-          x = unit(0.6, "npc") + unit(10, "mm"), y = unit(0.25, "npc") - unit(0, "mm"),
+grid.text("Source: NWR Historic Delay Attribution licensed under the Open Government Licence v3.0.\nCC-BY-SA Kim Idar Giske", 
+          x = unit(0.5, "npc") + unit(5, "mm"), y = unit(0.05, "npc") - unit(0, "mm"), just = "left",
           gp = gpar(fontsize = 8)) 
 invisible(dev.off())
 ```
@@ -563,62 +603,27 @@ invisible(dev.off())
 
 The most obvious conclusion one can draw by looking at the data is that the number of cancellations have been steadily increasing over the years. This could be due to any number of reasons, but by looking into some of the highest spikes throughout the years, it seems that extreme weather events are at least partially responsible. Below is a list of some of the most severe spikes and corresponding weather events:
 
-<table class="striped">
- <thead>
-  <tr>
-   <th style="text-align:left;">Date</th>
-   <th style="text-align:left;">Cancellations</th>
-   <th style="text-align:left;">Weather Event</th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;">June 23rd, 2016</td>
-   <td style="text-align:left;">4749</td>
-   <td style="text-align:left;">Severe flooding</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">February 23rd, 2017</td>
-   <td style="text-align:left;">5007</td>
-   <td style="text-align:left;">Storm Doris</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">February 26th-March 3rd, 2018</td>
-   <td style="text-align:left;">22,627</td>
-   <td style="text-align:left;">Extreme cold spell</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">September 19th-21st, 2018</td>
-   <td style="text-align:left;">5720</td>
-   <td style="text-align:left;">Storms Ali and Bronagh</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">November 26th-27th, 2021</td>
-   <td style="text-align:left;">6082</td>
-   <td style="text-align:left;">Storm Arwen</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">February 16th-21st, 2022</td>
-   <td style="text-align:left;">25,116</td>
-   <td style="text-align:left;">Storms Dudley, Eunice and Franklin</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">February 16th-21st, 2022</td>
-   <td style="text-align:left;">15,005</td>
-   <td style="text-align:left;">Extreme heatwave</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">December 8th-18th, 2022</td>
-   <td style="text-align:left;">21,236</td>
-   <td style="text-align:left;">Extreme cold spell</td>
-  </tr>
-  <tr>
-   <td style="text-align:left;">January 2nd, 2024</td>
-   <td style="text-align:left;">5482</td>
-   <td style="text-align:left;">Storm Henk</td>
-  </tr>
-</tbody>
-</table>
++-------------------------------+---------------+------------------------------------+
+| Date                          | Cancellations | Weather Event                      |
++:==============================+:==============+:===================================+
+| June 23rd, 2016               | 4749          | Severe flooding                    |
++-------------------------------+---------------+------------------------------------+
+| February 23rd, 2017           | 5007          | Storm Doris                        |
++-------------------------------+---------------+------------------------------------+
+| February 26th-March 3rd, 2018 | 22,627        | Extreme cold spell                 |
++-------------------------------+---------------+------------------------------------+
+| September 19th-21st, 2018     | 5720          | Storms Ali and Bronagh             |
++-------------------------------+---------------+------------------------------------+
+| November 26th-27th, 2021      | 6082          | Storm Arwen                        |
++-------------------------------+---------------+------------------------------------+
+| February 16th-21st, 2022      | 25,116        | Storms Dudley, Eunice and Franklin |
++-------------------------------+---------------+------------------------------------+
+| February 16th-21st, 2022      | 15,005        | Extreme heatwave                   |
++-------------------------------+---------------+------------------------------------+
+| December 8th-18th, 2022       | 21,236        | Extreme cold spell                 |
++-------------------------------+---------------+------------------------------------+
+| January 2nd, 2024             | 5482          | Storm Henk                         |
++-------------------------------+---------------+------------------------------------+
 
 The weather data in this table is sourced from the UK Storm Centre [@MetStorms] and case studies of past weather events [@MetWeather] on the Met Office website.
 
