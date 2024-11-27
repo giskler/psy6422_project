@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2024-11-24" />
+<meta name="date" content="2024-11-27" />
 
 <title>PSY 6422 Project</title>
 
@@ -378,7 +378,7 @@ div.tocify {
 <h1 class="title toc-ignore">PSY 6422 Project</h1>
 <h4 class="author"><div class="line-block">Kim Idar Giske<br />
 Registration number: 240196505</div></h4>
-<h4 class="date">2024-11-24</h4>
+<h4 class="date">2024-11-27</h4>
 
 </div>
 
@@ -511,7 +511,7 @@ between April 1st 2015 and October 12th 2024 were used.</p>
 <span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>        <span class="co"># Read the files using fread</span></span>
 <span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>        plyr<span class="sc">::</span><span class="fu">ldply</span>(filelist, fread) <span class="sc">%&gt;%</span></span>
 <span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>            <span class="co"># Convert column names to snake case using janitor</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>        <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>        janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>            <span class="co"># Rename columns</span></span>
 <span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="fu">any_of</span>(rename_cols)) <span class="sc">%&gt;%</span></span>
 <span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>            <span class="co"># Drop observations that contain delay data and planned</span></span>
@@ -525,7 +525,7 @@ between April 1st 2015 and October 12th 2024 were used.</p>
 <span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a>            <span class="at">.before =</span> origin_departure_date) <span class="sc">%&gt;%</span></span>
 <span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a>            <span class="co"># Change data type to date</span></span>
 <span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">departure_date =</span> <span class="fu">as.Date</span>(departure_date)) <span class="sc">%&gt;%</span></span>
-<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>            <span class="co"># Keep only the columns we are interested</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>            <span class="co"># Keep only the columns that are of interest</span></span>
 <span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>        <span class="fu">select</span>(departure_date, toc_code, event_type, react_reason, stanox)</span>
 <span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>    }</span>
 <span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a></span>
@@ -566,7 +566,7 @@ descriptors for the variables in the data frame and save it as a csv
 file, which allows for access to the data used in the project without
 needing to obtain access to the Rail Data Marketplace.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Create a train operator data frame. This is easier than reading it from the</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># glossary as it contains freight operators which we are not interested in</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># glossary as it contains a lot of freight operators</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>operators <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">toc_code =</span> <span class="fu">c</span>(<span class="st">&quot;EA&quot;</span>, <span class="st">&quot;EB&quot;</span>, <span class="st">&quot;EC&quot;</span>, <span class="st">&quot;ED&quot;</span>, <span class="st">&quot;EE&quot;</span>, <span class="st">&quot;EF&quot;</span>, <span class="st">&quot;EH&quot;</span>, <span class="st">&quot;EJ&quot;</span>,</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="st">&quot;EK&quot;</span>, <span class="st">&quot;EM&quot;</span>, <span class="st">&quot;ES&quot;</span>, <span class="st">&quot;ET&quot;</span>, <span class="st">&quot;EX&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HB&quot;</span>, <span class="st">&quot;HE&quot;</span>, <span class="st">&quot;HF&quot;</span>, <span class="st">&quot;HL&quot;</span>, <span class="st">&quot;HM&quot;</span>, <span class="st">&quot;HO&quot;</span>, <span class="st">&quot;HT&quot;</span>,</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="st">&quot;HU&quot;</span>, <span class="st">&quot;HX&quot;</span>, <span class="st">&quot;HY&quot;</span>, <span class="st">&quot;LD&quot;</span>, <span class="st">&quot;LN&quot;</span>, <span class="st">&quot;PF&quot;</span>, <span class="st">&quot;XB&quot;</span>, <span class="st">&quot;XC&quot;</span>, <span class="st">&quot;XE&quot;</span>), <span class="at">operator =</span> <span class="fu">c</span>(<span class="st">&quot;TransPennine Express&quot;</span>,</span>
@@ -653,17 +653,17 @@ Archimedean spiral using the spiralize library.</p>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># documentation for the spiralize library for further details on its functions</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>spiral_plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, start, end) {</span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="co"># We&#39;ll use a temporary data frame to store the filtered date range</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="co"># Use a temporary data frame to store the filtered date range</span></span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    temp_df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>        <span class="fu">filter</span>(departure_date <span class="sc">&gt;</span> start <span class="sc">&amp;</span> departure_date <span class="sc">&lt;</span> end)</span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="co"># Initialize the spiral graph. As the spiral is 360 degrees, we have a</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="co"># choice to either normalize each year to 360 or to plot each year as</span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>    <span class="co"># 365/366 days. Both options have their drawbacks and advantages</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="co"># Initialize the spiral graph. As the spiral is 360 degrees, the choice is</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="co"># to either normalize each year to 360 or to plot each year as 365/366</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>    <span class="co"># days. Both options have their drawbacks and advantages</span></span>
 <span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>    <span class="fu">spiral_initialize_by_time</span>(<span class="at">xlim =</span> <span class="fu">range</span>(temp_df<span class="sc">$</span>departure_date), <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>        <span class="at">normalize_year =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>    <span class="co"># Load data track. We set the range of the y axis to be slightly higher</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>    <span class="co"># Load data track. The range of the y axis is set to be slightly higher</span></span>
 <span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>    <span class="co"># than the maximum value</span></span>
 <span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>    <span class="fu">spiral_track</span>(<span class="at">height =</span> <span class="fl">0.8</span>, <span class="at">background =</span> <span class="cn">FALSE</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.05</span> <span class="sc">*</span> <span class="fu">max</span>(temp_df<span class="sc">$</span>n)))</span>
 <span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a></span>
@@ -771,18 +771,18 @@ of cancellations per year has also been added.</p>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>    <span class="co"># Store the maximum y axis value for the entire data set</span></span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>    y_maximum <span class="ot">=</span> <span class="fu">max</span>(df<span class="sc">$</span>n)</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>    <span class="co"># We&#39;ll use a temporary data frame to store the filtered date range</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>    <span class="co"># Use a temporary data frame to store the filtered date range</span></span>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>    temp_df <span class="ot">&lt;-</span> train_count <span class="sc">%&gt;%</span></span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>        <span class="fu">filter</span>(departure_date <span class="sc">&gt;</span> start <span class="sc">&amp;</span> departure_date <span class="sc">&lt;</span> end)</span>
 <span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="co"># Initialize the spiral graph. As the spiral is 360 degrees, we have a</span></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>    <span class="co"># choice to either normalize each year to 360 or to plot each year as</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="co"># 365/366 days. Both options have their drawbacks and advantages</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="co"># Initialize the spiral graph. As the spiral is 360 degrees, the choice is</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>    <span class="co"># to either normalize each year to 360 or to plot each year as 365/366</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="co"># days. Both options have their drawbacks and advantages</span></span>
 <span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    <span class="fu">spiral_initialize_by_time</span>(<span class="at">xlim =</span> <span class="fu">range</span>(temp_df<span class="sc">$</span>departure_date), <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>        <span class="at">normalize_year =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>    <span class="co"># Load data track. Since we&#39;re now plotting each year separately, we change</span></span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>    <span class="co"># the y max to the maximum for the entire data set</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>    <span class="co"># Load data track. Since each year is now plotted separately, the y max is</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>    <span class="co"># changed to the maximum for the entire data set</span></span>
 <span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>    <span class="fu">spiral_track</span>(<span class="at">height =</span> <span class="fl">0.8</span>, <span class="at">background =</span> <span class="cn">FALSE</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.05</span> <span class="sc">*</span> <span class="fu">max</span>(y_maximum)))</span>
 <span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a></span>
 <span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>    <span class="co"># Draw backgrounds for the breakpoints. TRACK_META reads the meta data of</span></span>

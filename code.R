@@ -45,7 +45,7 @@ for(i in 1:length(csvfiles)) {
   train_reader <- function(filelist) { 
     
     plyr::ldply(filelist, fread) %>% #Read the files using fread
-      clean_names() %>% #Convert column names to snake case using janitor
+      janitor::clean_names() %>% #Convert column names to snake case using janitor
       dplyr::rename(any_of(rename_cols)) %>% #Rename columns
       filter(event_type != "M" & event_type != "F" & event_type != "A" & 
                event_type != "O" & event_type != "S") %>% #Drop observations that contain delay data and planned cancellations
@@ -53,7 +53,7 @@ for(i in 1:length(csvfiles)) {
       mutate(departure_date = parse_date_time(origin_departure_date, c("dmy", "%d/%m/%Y %H%M")), 
              .before = origin_departure_date) %>% #Convert the date format using lubridate
       mutate(departure_date = as.Date(departure_date)) %>% #Change data type to date
-      select(departure_date, toc_code, event_type, react_reason, stanox) #Keep only the columns we are interested
+      select(departure_date, toc_code, event_type, react_reason, stanox) #Keep only the columns that are of interest
   } 
   
   train_frame[[i]] <- train_reader(csvfiles[i])
@@ -121,17 +121,9 @@ write.csv(master_df, file=gzfile("data/masterfile.csv.gz"))
 ##Spiral graph -------------------------------------------------------------------------------------------------------------------------------------
 
 #Count the number of cancellations by date
-train_count <- master_df %>% group_by(departure_date) %>% tally()
-
-#Read weather data
-weather <- fread("data/weather.csv") %>%
-  dplyr::rename(departure_date = date) %>% #Rename columns
-  mutate(departure_date = as.Date(departure_date)) %>% #Change data type to date
-  mutate(type = as.factor(type)) #Turn weather types into a factor, this is necessary in order to populate the weather track
-
-#Merge data frames
-train_count <- train_count %>% left_join(weather, 
-                                         by=c("departure_date"))
+train_count <- master_df %>% 
+               group_by(departure_date) %>% 
+               tally()
 
 #Sanity check, number of cancellations should equal number of observations in master data frame
 assert(nrow(master_df), sum(train_count$n))
@@ -140,15 +132,15 @@ assert(nrow(master_df), sum(train_count$n))
 #Refer to the documentation for the spiralize library for further details on its functions
 spiral_plot <- function(df, start, end){
   
-  #We'll use a temporary data frame to store the filtered date range
+  #Use a temporary data frame to store the filtered date range
   temp_df <- df %>% 
-    filter(departure_date > start & departure_date < end) 
+             filter(departure_date > start & departure_date < end) 
   
-  #Initialize the spiral graph. As the spiral is 360 degrees, we have a choice to either normalize each year to 360 or to plot
+  #Initialize the spiral graph. As the spiral is 360 degrees, the choice is to either normalize each year to 360 or to plot
   #each year as 365/366 days. Both options have their drawbacks and advantages
   spiral_initialize_by_time(xlim = range(temp_df$departure_date), verbose = FALSE, normalize_year = FALSE)
  
-  #Load train track. We set the range of the y axis to be slightly higher than the maximum value
+  #Load train track. The range of the y axis is set to be slightly higher than the maximum value
   spiral_track(height =  0.8, background = FALSE, ylim = c(0, 1.05*max(temp_df$n)))
   
   #Draw backgrounds for the breakpoints. TRACK_META reads the meta data of the current track
@@ -161,6 +153,7 @@ spiral_plot <- function(df, start, end){
   
   #Draw bar plot
   spiral_bars(temp_df$departure_date, temp_df$n, gp = gpar(fill = 4, col = 4)) 
+  
   
   #Create unit labels
   max = TRACK_META$ymax #Read the maximum value of the y axis
@@ -180,15 +173,21 @@ spiral_plot <- function(df, start, end){
   years = as.character(unique(year(temp_df$departure_date))) #Create a vector with the years in the date range
   
   for (i in 1:length(years)){
-    spiral_text(sprintf("%s-01-01", years[i]), TRACK_META$ycenter, years[i], gp = gpar(fontsize = 8)) #Place a year label on January 1st of each year
+    #Place a year label on January 1st of each year
+    spiral_text(sprintf("%s-01-01", years[i]), TRACK_META$ycenter, 
+                years[i], gp = gpar(fontsize = 8)) 
   } 
 
   #Create the title
-  grid.text(sprintf("Train cancellations in Great Britain, %s-%s", first(years),last(years)), x = unit(0, "npc") + unit(0, "mm"), y = unit(1, "npc") - unit(0, "mm"),
+  grid.text(sprintf("Train cancellations in Great Britain, %s-%s", first(years),last(years)), 
+            x = unit(0, "npc") + unit(0, "mm"), 
+            y = unit(1, "npc") - unit(0, "mm"),
             gp = gpar(fontsize = 14)) 
   
   #Add source
-  grid.text("Source: NWR Historic Delay Attribution licensed under OGL v3.0.", x = unit(0, "npc") + unit(0, "mm"), y = unit(0, "npc") - unit(0, "mm"),
+  grid.text("Source: NWR Historic Delay Attribution licensed under OGL v3.0.", 
+            x = unit(0, "npc") + unit(0, "mm"), 
+            y = unit(0, "npc") - unit(0, "mm"),
             gp = gpar(fontsize = 8)) 
 }
 
@@ -197,7 +196,7 @@ spiral_plot(train_count, "2015-04-01", "2017-12-31")
 spiral_plot(train_count, "2018-01-01", "2020-12-31")
 spiral_plot(train_count, "2021-01-01", "2024-10-12")
 
-#Save the plots. We're not going to use ggsave as the quality of the saved file is noticeably worse using ggsave
+#Save the plots
 svg("figs/2015_2017.svg", width = 10, height = 6)
 spiral_plot(train_count, "2015-04-01", "2017-12-31")
 invisible(dev.off())
@@ -213,17 +212,18 @@ invisible(dev.off())
 ##Draw a grid of all years
 grid_plot <- function(df, start, end){  
   
+  #Store the maximum y axis value for the entire data set
   y_maximum = max(df$n)
   
-  #We'll use a temporary data frame to store the filtered date range
+  #Use a temporary data frame to store the filtered date range
   temp_df <- train_count %>% 
-    filter(departure_date > start & departure_date < end) 
+             filter(departure_date > start & departure_date < end) 
   
-  #Initialize the spiral graph. As the spiral is 360 degrees, we have a choice to either normalize each year to 360 or to plot
+  #Initialize the spiral graph. As the spiral is 360 degrees, the choice is to either normalize each year to 360 or to plot
   #each year as 365/366 days. Both options have their drawbacks and advantages
   spiral_initialize_by_time(xlim = range(temp_df$departure_date), verbose = FALSE, normalize_year = FALSE)
  
-  #Load train track. We set the range of the y axis to be slightly higher than the maximum value
+  #Load data track. Since each year is now plotted separately, the y max is changed to the maximum for the entire data set
   spiral_track(height =  0.8, background = FALSE, ylim = c(0, 1.05*max(y_maximum)))
   
   #Draw backgrounds for the breakpoints. TRACK_META reads the meta data of the current track
